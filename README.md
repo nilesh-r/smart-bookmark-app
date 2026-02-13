@@ -2,6 +2,8 @@
 
 A small app to save and manage your links. Sign in with Google, add bookmarks with a URL and title, and they stay private to you. Open the app in two tabs—add something in one, and it shows up in the other without refreshing. No email/password, just Google.
 
+**Live demo:** [https://smart-bookmark-app-six.vercel.app/](https://smart-bookmark-app-six.vercel.app/)
+
 ---
 
 ## What it does
