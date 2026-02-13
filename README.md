@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Bookmark
 
-## Getting Started
+A small app to save and manage your links. Sign in with Google, add bookmarks with a URL and title, and they stay private to you. Open the app in two tabs—add something in one, and it shows up in the other without refreshing. No email/password, just Google.
 
-First, run the development server:
+---
+
+## What it does
+
+- **Sign in with Google** — No signup form; you use your Google account only.
+- **Add bookmarks** — Paste a URL, give it a title, and it’s saved.
+- **Private to you** — Your list is yours only; nobody else can see it.
+- **Live across tabs** — Add or delete in one tab and the list updates in your other tabs.
+- **Delete when you want** — Each bookmark has a delete button.
+
+Built with **Next.js** (App Router), **Supabase** (auth, database, and realtime), and **Tailwind CSS**. You can run it locally or deploy it on Vercel.
+
+---
+
+## Getting started
+
+### 1. Clone and install
+
+```bash
+git clone <your-repo-url>
+cd smart-bookmark-app
+npm install
+```
+
+### 2. Set up Supabase
+
+Create a project at [supabase.com](https://supabase.com), then:
+
+1. **Turn on Google login**  
+   Go to **Authentication → Providers**, enable **Google**, and add your OAuth client ID and secret from [Google Cloud Console](https://console.cloud.google.com/). In Google, set the authorized redirect URI to:  
+   `https://<your-project-ref>.supabase.co/auth/v1/callback`.
+
+2. **Configure URLs**  
+   In **Authentication → URL Configuration**:
+   - **Site URL**: `http://localhost:3000` for local dev (or your Vercel URL later).
+   - **Redirect URLs**: add `http://localhost:3000/auth/callback` and, when you deploy, your production URL (e.g. `https://your-app.vercel.app/auth/callback`).
+
+3. **Create the database**  
+   In the **SQL Editor**, run everything in  
+   `supabase/migrations/20250213000000_create_bookmarks.sql`.  
+   If the table already exists, run `supabase/migrations/20250213000001_ensure_bookmarks_trigger_and_policies.sql` instead so the trigger and policies are in place.
+
+4. **Realtime**  
+   In **Database → Replication**, make sure the `bookmarks` table is enabled for Realtime (the first migration adds it to the publication).
+
+### 3. Environment variables
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+You need:
+
+- **NEXT_PUBLIC_SUPABASE_URL** — From Supabase: **Settings → API** (Project URL).
+- **NEXT_PUBLIC_SUPABASE_ANON_KEY** — From the same page (anon/public key).
+- **NEXT_PUBLIC_SITE_URL** — `http://localhost:3000` for local; your full Vercel URL (e.g. `https://smart-bookmark-app.vercel.app`) for production.
+
+### 4. Run it locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000), click “Sign in with Google,” and start adding bookmarks.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. Deploy on Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Push the repo to GitHub, import the project in Vercel, and add the same environment variables in the project settings. Set **NEXT_PUBLIC_SITE_URL** to your Vercel URL. In Supabase, add that URL (and `https://your-app.vercel.app/auth/callback`) to **Redirect URLs** so Google login works in production.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Things I ran into (and how I fixed them)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Realtime not updating in the other tab**  
+The list only updated in the tab where I added a bookmark. Fix: the `bookmarks` table has to be in Supabase’s Realtime publication. The migration does that with `ALTER PUBLICATION supabase_realtime ADD TABLE public.bookmarks`. I double-checked under **Database → Replication** that the table is enabled.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Inserts failing with RLS**  
+The client doesn’t send `user_id`, but RLS expects it. Fix: a `BEFORE INSERT` trigger that sets `user_id = auth.uid()`. The app only sends `url` and `title`; the trigger ties the row to the signed-in user so RLS is happy and the client can’t fake another user.
 
-## Deploy on Vercel
+**Google redirect wrong or broken in production**  
+After Google sign-in, redirects sometimes went to the wrong place or broke on Vercel. Fix: one callback route (`/auth/callback`) with a `next` query param for where to send the user (e.g. `/dashboard`). I made sure **Site URL** and **Redirect URLs** in Supabase included both localhost and the production URL so OAuth works in dev and prod.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Session / cookies not refreshing**  
+Sometimes the session didn’t persist or felt “logged out” because cookies weren’t updated. Fix: in the Next.js middleware, the Supabase cookie handler’s `setAll` has to write to the **response** cookies (`response.cookies.set(...)`), not just the request. That way the refreshed session is sent back to the browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Sign out sending me to localhost on production**  
+After signing out on the deployed app, I’d end up on localhost. Fix: the sign-out route now uses the request’s own origin for the redirect URL instead of relying on a single env var, so you always get sent back to the site you’re on.
+
+---
+
+## License
+
+MIT

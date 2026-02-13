@@ -24,6 +24,19 @@ create policy "Users can insert own bookmarks"
   on public.bookmarks for insert
   with check (auth.uid() = user_id);
 
+-- Set user_id automatically on insert so client does not need to send it
+create or replace function public.set_bookmark_user_id()
+returns trigger as $$
+begin
+  new.user_id := auth.uid();
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger set_bookmark_user_id
+  before insert on public.bookmarks
+  for each row execute function public.set_bookmark_user_id();
+
 create policy "Users can delete own bookmarks"
   on public.bookmarks for delete
   using (auth.uid() = user_id);

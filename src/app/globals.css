@@ -1,26 +1,152 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Default: dark theme (black-gray) */
+:root,
+[data-theme="dark"] {
+  --page-bg: #18181b;
+  --page-bg-elevated: #27272a;
+  --foreground: #fafafa;
+  --foreground-muted: #a1a1aa;
+  --foreground-subtle: #71717a;
+  --border: rgba(255, 255, 255, 0.08);
+  --hero-red: #e63946;
+  --hero-red-glow: rgba(230, 57, 70, 0.35);
+  --hero-gold: #f4a261;
+  --hero-gold-bright: #e9c46a;
+  --hero-dark: #27272a;
+  --hero-blue: #1e3a5f;
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-hover-border: rgba(230, 57, 70, 0.25);
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --page-bg: #f4f4f5;
+  --page-bg-elevated: #ffffff;
+  --foreground: #18181b;
+  --foreground-muted: #52525b;
+  --foreground-subtle: #71717a;
+  --border: rgba(0, 0, 0, 0.08);
+  --hero-red: #dc2626;
+  --hero-red-glow: rgba(220, 38, 38, 0.25);
+  --hero-gold: #ea580c;
+  --hero-gold-bright: #c2410c;
+  --hero-dark: #e4e4e7;
+  --hero-blue: #1e3a5f;
+  --input-bg: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.12);
+  --card-bg: #ffffff;
+  --card-hover-border: rgba(220, 38, 38, 0.3);
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--page-bg);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Crisp, clear text rendering */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--background);
+  background: var(--page-bg);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+input::placeholder {
+  color: var(--foreground-subtle);
+}
+
+/* Hero background: solid black-gray in dark, light gray in light */
+.hero-bg {
+  background: var(--page-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(230, 57, 70, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(244, 162, 97, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 16px var(--hero-red-glow); }
+  50% { box-shadow: 0 0 24px var(--hero-red-glow); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+.btn-hero {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-hero:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px var(--hero-red-glow);
+}
+.btn-hero:active {
+  transform: scale(0.98);
+}
+
+.card-hero {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--card-hover-border);
+  border-color: var(--card-hover-border);
+}
+
+.input-hero:focus {
+  box-shadow: 0 0 0 2px var(--page-bg), 0 0 0 4px var(--hero-red);
 }
