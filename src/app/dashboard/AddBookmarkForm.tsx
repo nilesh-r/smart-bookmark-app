@@ -19,9 +19,20 @@ export function AddBookmarkForm() {
     setLoading(true);
     const supabase = createClient();
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      setError('You must be signed in to add a bookmark.');
+      return;
+    }
+
     const { error: err } = await supabase
       .from('bookmarks')
-      .insert({ url: url.trim(), title: title.trim() })
+      .insert({
+        user_id: user.id,
+        url: url.trim(),
+        title: title.trim(),
+      })
       .select('id, url, title, created_at')
       .single();
 
@@ -32,7 +43,6 @@ export function AddBookmarkForm() {
     }
     setUrl('');
     setTitle('');
-    // Refresh so the list shows the new bookmark (works even if Realtime is off)
     router.refresh();
   }
 
