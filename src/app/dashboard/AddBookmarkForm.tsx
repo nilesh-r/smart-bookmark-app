@@ -1,8 +1,8 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { addBookmark } from './actions';
 
 export function AddBookmarkForm() {
   const router = useRouter();
@@ -17,28 +17,15 @@ export function AddBookmarkForm() {
     if (!url.trim() || !title.trim()) return;
 
     setLoading(true);
-    const supabase = createClient();
+    const formData = new FormData();
+    formData.set('url', url.trim());
+    formData.set('title', title.trim());
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setLoading(false);
-      setError('You must be signed in to add a bookmark.');
-      return;
-    }
-
-    const { error: err } = await supabase
-      .from('bookmarks')
-      .insert({
-        user_id: user.id,
-        url: url.trim(),
-        title: title.trim(),
-      })
-      .select('id, url, title, created_at')
-      .single();
+    const result = await addBookmark(formData);
 
     setLoading(false);
-    if (err) {
-      setError(err.message);
+    if (result.error) {
+      setError(result.error);
       return;
     }
     setUrl('');
