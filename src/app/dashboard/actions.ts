@@ -22,13 +22,10 @@ export async function addBookmark(formData: FormData) {
 
   const { error } = await supabase
     .from('bookmarks')
-    .insert({
-      user_id: user.id,
-      url,
-      title,
-    });
+    .insert({ user_id: user.id, url, title });
 
   if (error) {
+    console.error(error);
     return { error: error.message };
   }
 

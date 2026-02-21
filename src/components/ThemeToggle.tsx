@@ -5,29 +5,26 @@ import { useEffect, useState } from 'react';
 const THEME_KEY = 'smart-bookmark-theme';
 
 export function ThemeToggle({ className = '' }: { className?: string }) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window === 'undefined') return 'dark';
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'dark' || stored === 'light') return stored;
+
+    const htmlTheme = document.documentElement.getAttribute('data-theme');
+    if (htmlTheme === 'dark' || htmlTheme === 'light') return htmlTheme;
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
-    const prefersDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initial = stored ?? (prefersDark ? 'dark' : 'dark');
-    setTheme(initial);
-    document.documentElement.setAttribute('data-theme', initial);
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
   function toggle() {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     document.documentElement.setAttribute('data-theme', next);
-    if (typeof localStorage !== 'undefined') localStorage.setItem(THEME_KEY, next);
-  }
-
-  if (!mounted) {
-    return (
-      <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] ${className}`} aria-hidden />
-    );
   }
 
   return (
