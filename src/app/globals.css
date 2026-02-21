@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* Force redeploy - fixed tailwindcss-animate error */
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
