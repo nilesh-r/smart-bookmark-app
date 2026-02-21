@@ -1,67 +1,112 @@
-import { createClient } from '@/lib/supabase/server';
-import Link from 'next/link';
-import { Logo } from '@/components/Logo';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { AuthError } from './AuthError';
-import { SignInWithGoogle } from './SignInWithGoogle';
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+'use client';
 
-  const { error: errorParam } = await searchParams;
+import { useEffect, useState } from 'react';
+import { supabase } from '@/utils/supabase/client';
+import LoginButton from '@/components/LoginButton';
+import { Bookmark, Loader2 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import AddBookmarkForm from '@/components/AddBookmarkForm';
+import BookmarkList from '@/components/BookmarkList';
+import { motion } from 'framer-motion';
 
-  if (user) {
+export default function Home() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [newBookmark, setNewBookmark] = useState<any>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleBookmarkAdded = (bookmark: any) => {
+    setNewBookmark(bookmark);
+    // Reset after a short delay so the effect can trigger again if needed
+    setTimeout(() => setNewBookmark(null), 500);
+  };
+
+  if (loading) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center gap-8 px-4" style={{ color: 'var(--foreground)' }}>
-        <div className="absolute right-4 top-4">
-          <ThemeToggle />
-        </div>
-        <div className="animate-fade-in-up flex flex-col items-center gap-6 text-center">
-          <Logo href="/dashboard" className="animate-float" />
-          <p style={{ color: 'var(--foreground-muted)' }}>You are signed in.</p>
-          <Link
-            href="/dashboard"
-            className="btn-hero rounded-xl bg-gradient-to-r from-[var(--hero-red)] to-[var(--hero-gold)] px-6 py-3 font-semibold text-white shadow-lg"
-          >
-            Go to Dashboard
-          </Link>
-        </div>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center gap-8 px-4" style={{ color: 'var(--foreground)' }}>
-      <div className="absolute right-4 top-4">
-        <ThemeToggle />
-      </div>
-      <div className="flex max-w-md flex-col items-center gap-8 text-center">
-        <Logo className="animate-float" showText={true} href="/" />
-        <h1 className="animate-fade-in-up stagger-1 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: 'var(--foreground)' }}>
-          Save your links. <span style={{ color: 'var(--hero-gold)' }}>Sync everywhere.</span>
-        </h1>
-        <p className="animate-fade-in-up stagger-2" style={{ color: 'var(--foreground-muted)' }}>
-          Sign in with Google. Your bookmarks stay private and update in real time across tabs.
-        </p>
-        {errorParam && (
-          <div className="animate-fade-in-up stagger-3 w-full">
-            <AuthError message={errorParam} />
+  // If user is logged in, show the Dashboard view on the Homepage
+  if (user) {
+    return (
+      <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
+        <Navbar />
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="container mx-auto px-4 py-8 max-w-5xl"
+        >
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2 tracking-tight">My Library</h1>
+            <p className="text-muted-foreground">Manage and organize your favorite links.</p>
           </div>
-        )}
-        <div className="animate-fade-in-up stagger-4">
-          <SignInWithGoogle />
+
+          <AddBookmarkForm userId={user.id} onAdd={handleBookmarkAdded} />
+
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]"></span>
+              Saved Bookmarks
+            </h2>
+          </div>
+
+          <BookmarkList userId={user.id} addedBookmark={newBookmark} />
+        </motion.main>
+      </div>
+    );
+  }
+
+  // Otherwise show the Landing Page
+  return (
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 text-white overflow-hidden">
+      {/* Background blobs */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+      <div className="absolute top-0 -right-4 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+
+      <div className="relative z-10 text-center space-y-8 max-w-2xl bg-black/20 backdrop-blur-3xl p-12 rounded-3xl border border-white/10 shadow-2xl">
+        <div className="inline-flex items-center justify-center p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/30 mb-4 transform hover:rotate-3 transition-transform duration-500">
+          <Bookmark className="w-12 h-12 text-white" strokeWidth={1.5} />
         </div>
-        <p className="animate-fade-in-up stagger-5 text-sm" style={{ color: 'var(--foreground-subtle)' }}>
-          No email/password — Google OAuth only
+
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+            Smart<span className="text-indigo-400">Bookmarks</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-400 font-light">
+            Your digital brain for organizing the web. <br />
+            <span className="text-indigo-300 font-medium">Simple. Private. Real-time.</span>
+          </p>
+        </div>
+
+        <div className="pt-8">
+          <LoginButton />
+        </div>
+
+        <p className="text-sm text-gray-500 pt-8">
+          Powered by Supabase & Next.js
         </p>
       </div>
-    </div>
+    </main>
   );
 }

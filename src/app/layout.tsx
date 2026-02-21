@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { HeroBackground } from "@/components/HeroBackground";
-import { ThemeScript } from "@/components/ThemeScript";
+import { ThemeProvider } from "@/components/theme-provider"
+import IronManBackground from "@/components/IronManBackground";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Bookmark",
-  description: "Private bookmark manager with Google sign-in and real-time sync",
+  title: "Smart Bookmark App",
+  description: "A simple bookmark manager built with Next.js and Supabase",
 };
 
 export default function RootLayout({
@@ -27,11 +27,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeScript />
-        <HeroBackground />
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <IronManBackground />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

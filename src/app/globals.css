@@ -1,152 +1,166 @@
 @import "tailwindcss";
 
-/* Default: dark theme (black-gray) */
-:root,
-[data-theme="dark"] {
-  --page-bg: #18181b;
-  --page-bg-elevated: #27272a;
-  --foreground: #fafafa;
-  --foreground-muted: #a1a1aa;
-  --foreground-subtle: #71717a;
-  --border: rgba(255, 255, 255, 0.08);
-  --hero-red: #e63946;
-  --hero-red-glow: rgba(230, 57, 70, 0.35);
-  --hero-gold: #f4a261;
-  --hero-gold-bright: #e9c46a;
-  --hero-dark: #27272a;
-  --hero-blue: #1e3a5f;
-  --input-bg: rgba(255, 255, 255, 0.06);
-  --input-border: rgba(255, 255, 255, 0.1);
-  --card-bg: rgba(255, 255, 255, 0.04);
-  --card-hover-border: rgba(230, 57, 70, 0.25);
-}
+@plugin "tailwindcss-animate";
 
-/* Light theme */
-[data-theme="light"] {
-  --page-bg: #f4f4f5;
-  --page-bg-elevated: #ffffff;
-  --foreground: #18181b;
-  --foreground-muted: #52525b;
-  --foreground-subtle: #71717a;
-  --border: rgba(0, 0, 0, 0.08);
-  --hero-red: #dc2626;
-  --hero-red-glow: rgba(220, 38, 38, 0.25);
-  --hero-gold: #ea580c;
-  --hero-gold-bright: #c2410c;
-  --hero-dark: #e4e4e7;
-  --hero-blue: #1e3a5f;
-  --input-bg: #ffffff;
-  --input-border: rgba(0, 0, 0, 0.12);
-  --card-bg: #ffffff;
-  --card-hover-border: rgba(220, 38, 38, 0.3);
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--page-bg);
+@theme {
+  --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-radius: var(--radius);
 }
 
-/* Crisp, clear text rendering */
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+:root {
+  /* Light Mode - Classic Comic Style */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 3.9%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 3.9%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 3.9%);
+
+  /* Marvel Red */
+  --primary: hsl(358 85% 52%);
+  --primary-foreground: hsl(0 0% 98%);
+
+  /* Stark Industries Blue-Grey */
+  --secondary: hsl(215 25% 27%);
+  --secondary-foreground: hsl(0 0% 98%);
+
+  --muted: hsl(0 0% 96.1%);
+  --muted-foreground: hsl(0 0% 45.1%);
+
+  --accent: hsl(358 85% 96%);
+  /* Light red for hover */
+  --accent-foreground: hsl(358 85% 52%);
+
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+
+  --border: hsl(0 0% 89.8%);
+  --input: hsl(0 0% 89.8%);
+  --ring: hsl(358 85% 52%);
+
+  --radius: 0.5rem;
+  /* Sharper edges for tech feel */
+}
+
+.dark {
+  /* Dark Mode - Tech/Cinematic Style */
+  --background: hsl(220 15% 10%);
+  /* Deep moody blue-black */
+  --foreground: hsl(0 0% 98%);
+
+  --card: hsl(220 15% 14%);
+  --card-foreground: hsl(0 0% 98%);
+
+  --popover: hsl(220 15% 10%);
+  --popover-foreground: hsl(0 0% 98%);
+
+  /* Marvel Red Popping on Dark */
+  --primary: hsl(358 85% 58%);
+  --primary-foreground: hsl(0 0% 98%);
+
+  /* Gold/Yellow Accents (Infinity Stones / Iron Man) */
+  --secondary: hsl(48 96% 53%);
+  --secondary-foreground: hsl(220 15% 10%);
+
+  --muted: hsl(220 15% 20%);
+  --muted-foreground: hsl(220 10% 65%);
+
+  --accent: hsl(220 15% 25%);
+  --accent-foreground: hsl(0 0% 98%);
+
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+
+  --border: hsl(220 15% 20%);
+  --input: hsl(220 15% 20%);
+  --ring: hsl(358 85% 58%);
+}
+
+/* Global resets and base styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 body {
-  background: var(--page-bg);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-attachment: fixed;
+  background-size: cover;
 }
 
-input::placeholder {
-  color: var(--foreground-subtle);
-}
-
-/* Hero background: solid black-gray in dark, light gray in light */
-.hero-bg {
-  background: var(--page-bg);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+/* Light Mode Background - Subtle Comic Dots or Clean */
+body:not(.dark) {
   background-image:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(230, 57, 70, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(244, 162, 97, 0.04) 0%, transparent 50%);
-  pointer-events: none;
+    radial-gradient(at 0% 0%, hsla(358, 85%, 98%, 1) 0, transparent 40%),
+    radial-gradient(at 100% 100%, hsla(215, 50%, 95%, 1) 0, transparent 40%);
 }
 
-[data-theme="dark"] .hero-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
+/* Dark Mode Background - Cinematic */
+.dark body {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
+    radial-gradient(at 50% -20%, hsla(358, 60%, 20%, 0.4) 0, transparent 60%),
+    radial-gradient(at 0% 100%, hsla(220, 30%, 20%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 50%, hsla(260, 30%, 15%, 1) 0, transparent 50%);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+* {
+  border-color: var(--border);
 }
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 16px var(--hero-red-glow); }
-  50% { box-shadow: 0 0 24px var(--hero-red-glow); }
+/* Glassmorphism - Marvel Tech Style */
+.glass-panel {
+  @apply backdrop-blur-xl shadow-2xl;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(236, 29, 36, 0.1);
+  /* Subtle red border */
 }
 
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.dark .glass-panel {
+  background-color: rgba(30, 30, 40, 0.6);
+  border: 1px solid rgba(236, 29, 36, 0.2);
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.glass-card {
+  @apply backdrop-blur-md transition-all duration-300;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.animate-glow-pulse {
-  animation: glow-pulse 2.5s ease-in-out infinite;
+.dark .glass-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.4s ease-out forwards;
-}
-
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.3s; }
-
-.btn-hero {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.btn-hero:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 20px var(--hero-red-glow);
-}
-.btn-hero:active {
-  transform: scale(0.98);
-}
-
-.card-hero {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.card-hero:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--card-hover-border);
-  border-color: var(--card-hover-border);
-}
-
-.input-hero:focus {
-  box-shadow: 0 0 0 2px var(--page-bg), 0 0 0 4px var(--hero-red);
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 40px -10px rgba(236, 29, 36, 0.3);
+  /* Red glow on hover */
+  border-color: rgba(236, 29, 36, 0.5);
 }
